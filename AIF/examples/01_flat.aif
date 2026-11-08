@@ -1,0 +1,13 @@
+AIF/0.9
+
+agent_id:s status:s priority:i temperature:f
+@record
+agent_001
+active
+3
+0.7
+@record
+agent_002
+idle
+1
+0.5

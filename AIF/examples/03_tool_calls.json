@@ -1,0 +1,23 @@
+{
+  "agent_id": "agent_001",
+  "tools": [
+    {
+      "name": "web_search",
+      "arguments": {
+        "query": "AI technology",
+        "limit": 10
+      },
+      "result": {
+        "success": true,
+        "count": 10
+      }
+    },
+    {
+      "name": "calculator",
+      "arguments": {
+        "query": "1+1",
+        "limit": 1
+      }
+    }
+  ]
+}

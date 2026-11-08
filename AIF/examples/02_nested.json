@@ -1,0 +1,28 @@
+[
+  {
+    "id": "A1",
+    "profile": {
+      "city": "Shanghai",
+      "age": 30
+    },
+    "state": {
+      "session": {
+        "turn": 2,
+        "active": true
+      }
+    }
+  },
+  {
+    "id": "A2",
+    "profile": {
+      "city": "Beijing",
+      "age": 28
+    },
+    "state": {
+      "session": {
+        "turn": 5,
+        "active": false
+      }
+    }
+  }
+]

@@ -1,0 +1,19 @@
+AIF/0.9
+
+@single
+agent_id:s tools[]:object
+@record
+agent_001
+@objects
+name:s arguments.query:s arguments.limit:i result.success?:b result.count?:i
+2
+web_search
+AI\stechnology
+10
+true
+10
+calculator
+1+1
+1
+-
+-

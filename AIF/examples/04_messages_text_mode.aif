@@ -1,0 +1,21 @@
+AIF/0.9
+
+agent_id:s messages[]:object
+@record
+agent_001
+@objects
+role:s content:s
+2
+user
+Find the latest AI news.
+assistant
+I will search for current information.
+@record
+agent_002
+@objects
+role:s content:s
+2
+user
+Summarize the results please.
+assistant
+Here is a short summary.

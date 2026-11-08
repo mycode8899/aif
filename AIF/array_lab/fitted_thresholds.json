@@ -1,0 +1,12 @@
+{
+  "fitted_on": "CALIBRATION_GRID (f in 2/4/7, k in 3/7/15/30, seed 909)",
+  "evaluation_disjoint": true,
+  "objective": "minimise total cl100k_base tokens over calibration set",
+  "thresholds": {
+    "k": 8,
+    "f": 2,
+    "L": 8,
+    "M": 0.15
+  },
+  "calibration_total_tokens": 339253
+}

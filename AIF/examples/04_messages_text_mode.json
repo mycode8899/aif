@@ -1,0 +1,28 @@
+[
+  {
+    "agent_id": "agent_001",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Find the latest AI news."
+      },
+      {
+        "role": "assistant",
+        "content": "I will search for current information."
+      }
+    ]
+  },
+  {
+    "agent_id": "agent_002",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Summarize the results please."
+      },
+      {
+        "role": "assistant",
+        "content": "Here is a short summary."
+      }
+    ]
+  }
+]

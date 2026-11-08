@@ -1,0 +1,1277 @@
+{
+  "format": "AIF/0.9 conformance test vectors",
+  "specification": "specification/AIF-0.9.md",
+  "implementer_guide": "conformance/IMPLEMENTER_GUIDE.md",
+  "generated_by": "conformance/build_vectors.py",
+  "generated_at": "2026-11-08 12:54:39",
+  "count": 42,
+  "positive": 33,
+  "negative": 9,
+  "how_to_use": [
+    "A DECODER must decode expected_aif_structured AND expected_aif_text_mode to expected_decoded.",
+    "An ENCODER's output must decode to input_json in the reference implementation; byte equality with expected_aif_* is informative, not required.",
+    "Every negative vector must be REJECTED, never silently encoded."
+  ],
+  "known_interop_limits": [
+    "JSON numeric literals such as 3.0 lose their int/float distinction in JavaScript (JSON.parse returns 3). Test vectors deliberately use non-integral floats only. A JS encoder cannot infer the original AIF type from a JSON number literal; this is a JSON model limitation, not an AIF defect.",
+    "Python decodes @single documents to a dict and list documents to a list; implementations must preserve that shape."
+  ],
+  "vectors": [
+    {
+      "id": "V001",
+      "title": "flat object, 3 scalar types",
+      "category": "flat",
+      "kind": "positive",
+      "input_json": {
+        "name": "Alice",
+        "age": 30,
+        "active": true
+      },
+      "expected_aif_structured": "AIF/0.9\n\n@single\nname:s age:i active:b\n@record\nAlice\n30\ntrue",
+      "expected_aif_text_mode": "AIF/0.9\n\n@single\nname:s age:i active:b\n@record\nAlice\n30\ntrue",
+      "expected_decoded": {
+        "name": "Alice",
+        "age": 30,
+        "active": true
+      },
+      "notes": "baseline; @single must be emitted for a top-level dict"
+    },
+    {
+      "id": "V002",
+      "title": "flat list with 3 records",
+      "category": "flat",
+      "kind": "positive",
+      "input_json": [
+        {
+          "name": "Alice",
+          "age": 30,
+          "active": true
+        },
+        {
+          "name": "Bob",
+          "age": 25,
+          "active": false
+        },
+        {
+          "name": "Carol",
+          "age": 41,
+          "active": true
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nname:s age:i active:b\n@record\nAlice\n30\ntrue\n@record\nBob\n25\nfalse\n@record\nCarol\n41\ntrue",
+      "expected_aif_text_mode": "AIF/0.9\n\nname:s age:i active:b\n@record\nAlice\n30\ntrue\n@record\nBob\n25\nfalse\n@record\nCarol\n41\ntrue",
+      "expected_decoded": [
+        {
+          "name": "Alice",
+          "age": 30,
+          "active": true
+        },
+        {
+          "name": "Bob",
+          "age": 25,
+          "active": false
+        },
+        {
+          "name": "Carol",
+          "age": 41,
+          "active": true
+        }
+      ],
+      "notes": "no @single for a list"
+    },
+    {
+      "id": "V003",
+      "title": "single-element list (not @single)",
+      "category": "shape",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "A1",
+          "v": 1
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s v:i\n@record\nA1\n1",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s v:i\n@record\nA1\n1",
+      "expected_decoded": [
+        {
+          "id": "A1",
+          "v": 1
+        }
+      ],
+      "notes": "distinguishes [ {...} ] from {...}"
+    },
+    {
+      "id": "V004",
+      "title": "empty list",
+      "category": "shape",
+      "kind": "positive",
+      "input_json": [],
+      "expected_aif_structured": "AIF/0.9\n",
+      "expected_aif_text_mode": "AIF/0.9\n",
+      "expected_decoded": [],
+      "notes": "encodes as header + blank line; decodes back to []"
+    },
+    {
+      "id": "V005",
+      "title": "chinese values",
+      "category": "flat",
+      "kind": "positive",
+      "input_json": [
+        {
+          "name": "张伟",
+          "city": "上海",
+          "age": 30
+        },
+        {
+          "name": "李娜",
+          "city": "北京",
+          "age": 28
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nname:s city:s age:i\n@record\n张伟\n上海\n30\n@record\n李娜\n北京\n28",
+      "expected_aif_text_mode": "AIF/0.9\n\nname:s city:s age:i\n@record\n张伟\n上海\n30\n@record\n李娜\n北京\n28",
+      "expected_decoded": [
+        {
+          "name": "张伟",
+          "city": "上海",
+          "age": 30
+        },
+        {
+          "name": "李娜",
+          "city": "北京",
+          "age": 28
+        }
+      ],
+      "notes": "UTF-8, ensure_ascii=False"
+    },
+    {
+      "id": "V006",
+      "title": "nested object depth 1",
+      "category": "nested",
+      "kind": "positive",
+      "input_json": {
+        "name": "张伟",
+        "profile": {
+          "age": 30,
+          "city": "上海"
+        }
+      },
+      "expected_aif_structured": "AIF/0.9\n\n@single\nname:s profile.age:i profile.city:s\n@record\n张伟\n30\n上海",
+      "expected_aif_text_mode": "AIF/0.9\n\n@single\nname:s profile.age:i profile.city:s\n@record\n张伟\n30\n上海",
+      "expected_decoded": {
+        "name": "张伟",
+        "profile": {
+          "age": 30,
+          "city": "上海"
+        }
+      },
+      "notes": "flattened field paths profile.age / profile.city"
+    },
+    {
+      "id": "V007",
+      "title": "nested object depth 3",
+      "category": "nested",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "a",
+          "p": {
+            "q": {
+              "r": {
+                "v": 42
+              }
+            }
+          }
+        },
+        {
+          "id": "b",
+          "p": {
+            "q": {
+              "r": {
+                "v": 7
+              }
+            }
+          }
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s p.q.r.v:i\n@record\na\n42\n@record\nb\n7",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s p.q.r.v:i\n@record\na\n42\n@record\nb\n7",
+      "expected_decoded": [
+        {
+          "id": "a",
+          "p": {
+            "q": {
+              "r": {
+                "v": 42
+              }
+            }
+          }
+        },
+        {
+          "id": "b",
+          "p": {
+            "q": {
+              "r": {
+                "v": 7
+              }
+            }
+          }
+        }
+      ],
+      "notes": "multi-level path reconstruction"
+    },
+    {
+      "id": "V008",
+      "title": "optional field missing in some records",
+      "category": "optional",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "A1",
+          "v": 1
+        },
+        {
+          "id": "A2"
+        },
+        {
+          "id": "A3",
+          "v": 3
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s v?:i\n@record\nA1\n1\n@record\nA2\n-\n@record\nA3\n3",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s v?:i\n@record\nA1\n1\n@record\nA2\n-\n@record\nA3\n3",
+      "expected_decoded": [
+        {
+          "id": "A1",
+          "v": 1
+        },
+        {
+          "id": "A2"
+        },
+        {
+          "id": "A3",
+          "v": 3
+        }
+      ],
+      "notes": "missing slot is exactly one '-' line; optional fields sort to tail"
+    },
+    {
+      "id": "V009",
+      "title": "top-level null value",
+      "category": "null",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "A1",
+          "score": null
+        },
+        {
+          "id": "A2",
+          "score": 5
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s score:i\n@record\nA1\n@null\n@record\nA2\n5",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s score:i\n@record\nA1\n@null\n@record\nA2\n5",
+      "expected_decoded": [
+        {
+          "id": "A1",
+          "score": null
+        },
+        {
+          "id": "A2",
+          "score": 5
+        }
+      ],
+      "notes": "@null vs '-' must remain distinguishable"
+    },
+    {
+      "id": "V010",
+      "title": "explicitly null nested object",
+      "category": "null",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "A1",
+          "result": {
+            "ok": true,
+            "n": 1
+          }
+        },
+        {
+          "id": "A2",
+          "result": null
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s result.ok?:b result.n?:i\n@record\nA1\ntrue\n1\n@record\nA2\n@onull:result\n-",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s result.ok?:b result.n?:i\n@record\nA1\ntrue\n1\n@record\nA2\n@onull:result\n-",
+      "expected_decoded": [
+        {
+          "id": "A1",
+          "result": {
+            "ok": true,
+            "n": 1
+          }
+        },
+        {
+          "id": "A2",
+          "result": null
+        }
+      ],
+      "notes": "@onull:<path> distinguishes 'object is null' from 'field absent'"
+    },
+    {
+      "id": "V011",
+      "title": "scalar string array",
+      "category": "array",
+      "kind": "positive",
+      "input_json": {
+        "id": "A1",
+        "tags": [
+          "AI",
+          "technology",
+          "agents"
+        ]
+      },
+      "expected_aif_structured": "AIF/0.9\n\n@single\nid:s tags[]:s\n@record\nA1\n@array\n3\nAI\ntechnology\nagents",
+      "expected_aif_text_mode": "AIF/0.9\n\n@single\nid:s tags[]:s\n@record\nA1\n@array\n3\nAI\ntechnology\nagents",
+      "expected_decoded": {
+        "id": "A1",
+        "tags": [
+          "AI",
+          "technology",
+          "agents"
+        ]
+      },
+      "notes": "@array + count + one line per element"
+    },
+    {
+      "id": "V012",
+      "title": "scalar integer array",
+      "category": "array",
+      "kind": "positive",
+      "input_json": {
+        "id": "A1",
+        "scores": [
+          1,
+          20,
+          300
+        ]
+      },
+      "expected_aif_structured": "AIF/0.9\n\n@single\nid:s scores[]:i\n@record\nA1\n@array\n3\n1\n20\n300",
+      "expected_aif_text_mode": "AIF/0.9\n\n@single\nid:s scores[]:i\n@record\nA1\n@array\n3\n1\n20\n300",
+      "expected_decoded": {
+        "id": "A1",
+        "scores": [
+          1,
+          20,
+          300
+        ]
+      },
+      "notes": "array_i"
+    },
+    {
+      "id": "V013",
+      "title": "scalar boolean array",
+      "category": "array",
+      "kind": "positive",
+      "input_json": {
+        "id": "A1",
+        "flags": [
+          true,
+          false,
+          true
+        ]
+      },
+      "expected_aif_structured": "AIF/0.9\n\n@single\nid:s flags[]:b\n@record\nA1\n@array\n3\ntrue\nfalse\ntrue",
+      "expected_aif_text_mode": "AIF/0.9\n\n@single\nid:s flags[]:b\n@record\nA1\n@array\n3\ntrue\nfalse\ntrue",
+      "expected_decoded": {
+        "id": "A1",
+        "flags": [
+          true,
+          false,
+          true
+        ]
+      },
+      "notes": "array_b"
+    },
+    {
+      "id": "V014",
+      "title": "empty scalar array",
+      "category": "array",
+      "kind": "positive",
+      "input_json": {
+        "id": "A1",
+        "tags": []
+      },
+      "expected_aif_structured": "AIF/0.9\n\n@single\nid:s tags[]:s\n@record\nA1\n@array\n0",
+      "expected_aif_text_mode": "AIF/0.9\n\n@single\nid:s tags[]:s\n@record\nA1\n@array\n0",
+      "expected_decoded": {
+        "id": "A1",
+        "tags": []
+      },
+      "notes": "count = 0, no element lines"
+    },
+    {
+      "id": "V015",
+      "title": "array of objects, two fields",
+      "category": "object_array",
+      "kind": "positive",
+      "input_json": {
+        "users": [
+          {
+            "name": "A",
+            "age": 20
+          },
+          {
+            "name": "B",
+            "age": 30
+          }
+        ]
+      },
+      "expected_aif_structured": "AIF/0.9\n\n@single\nusers[]:object\n@record\n@objects\nname:s age:i\n2\nA\n20\nB\n30",
+      "expected_aif_text_mode": "AIF/0.9\n\n@single\nusers[]:object\n@record\n@objects\nname:s age:i\n2\nA\n20\nB\n30",
+      "expected_decoded": {
+        "users": [
+          {
+            "name": "A",
+            "age": 20
+          },
+          {
+            "name": "B",
+            "age": 30
+          }
+        ]
+      },
+      "notes": "@objects block with its own schema"
+    },
+    {
+      "id": "V016",
+      "title": "array of objects, optional fields",
+      "category": "object_array",
+      "kind": "positive",
+      "input_json": {
+        "tools": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "AI technology",
+              "limit": 10
+            },
+            "result": {
+              "success": true,
+              "count": 10
+            }
+          },
+          {
+            "name": "calculator",
+            "arguments": {
+              "query": "1+1",
+              "limit": 1
+            }
+          }
+        ]
+      },
+      "expected_aif_structured": "AIF/0.9\n\n@single\ntools[]:object\n@record\n@objects\nname:s arguments.query:s arguments.limit:i result.success?:b result.count?:i\n2\nweb_search\nAI\\stechnology\n10\ntrue\n10\ncalculator\n1+1\n1\n-\n-",
+      "expected_aif_text_mode": "AIF/0.9\n\n@single\ntools[]:object\n@record\n@objects\nname:s arguments.query:s arguments.limit:i result.success?:b result.count?:i\n2\nweb_search\nAI technology\n10\ntrue\n10\ncalculator\n1+1\n1\n-\n-",
+      "expected_decoded": {
+        "tools": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "AI technology",
+              "limit": 10
+            },
+            "result": {
+              "success": true,
+              "count": 10
+            }
+          },
+          {
+            "name": "calculator",
+            "arguments": {
+              "query": "1+1",
+              "limit": 1
+            }
+          }
+        ]
+      },
+      "notes": "canonical AIF/0.9 example from the specification §9"
+    },
+    {
+      "id": "V017",
+      "title": "empty array of objects",
+      "category": "object_array",
+      "kind": "positive",
+      "input_json": {
+        "tools": []
+      },
+      "expected_aif_structured": "AIF/0.9\n\n@single\ntools[]:s\n@record\n@array\n0",
+      "expected_aif_text_mode": "AIF/0.9\n\n@single\ntools[]:s\n@record\n@array\n0",
+      "expected_decoded": {
+        "tools": []
+      },
+      "notes": "@objects with count 0"
+    },
+    {
+      "id": "V018",
+      "title": "object array with result = null",
+      "category": "object_array",
+      "kind": "positive",
+      "input_json": {
+        "items": [
+          {
+            "name": "A",
+            "result": {
+              "success": true
+            }
+          },
+          {
+            "name": "B",
+            "result": null
+          }
+        ]
+      },
+      "expected_aif_structured": "AIF/0.9\n\n@single\nitems[]:object\n@record\n@objects\nname:s result.success?:b\n2\nA\ntrue\nB\n@onull:result",
+      "expected_aif_text_mode": "AIF/0.9\n\n@single\nitems[]:object\n@record\n@objects\nname:s result.success?:b\n2\nA\ntrue\nB\n@onull:result",
+      "expected_decoded": {
+        "items": [
+          {
+            "name": "A",
+            "result": {
+              "success": true
+            }
+          },
+          {
+            "name": "B",
+            "result": null
+          }
+        ]
+      },
+      "notes": "@onull inside an @objects block"
+    },
+    {
+      "id": "V019",
+      "title": "marker-like strings",
+      "category": "escaping",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "@null",
+          "note": "@missing",
+          "extra": "@onull:x",
+          "v": 1
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s note:s extra:s v:i\n@record\n\\@null\n\\@missing\n\\@onull:x\n1",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s note:s extra:s v:i\n@record\n\\@null\n\\@missing\n\\@onull:x\n1",
+      "expected_decoded": [
+        {
+          "id": "@null",
+          "note": "@missing",
+          "extra": "@onull:x",
+          "v": 1
+        }
+      ],
+      "notes": "literal marker strings must survive as strings"
+    },
+    {
+      "id": "V020",
+      "title": "leading dash and empty string",
+      "category": "escaping",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "-",
+          "note": "-dash",
+          "body": "",
+          "v": 2
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s note:s body:s v:i\n@record\n\\-\n\\-dash\n\\e\n2",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s note:s body:s v:i\n@record\n\\-\n\\-dash\n\\e\n2",
+      "expected_decoded": [
+        {
+          "id": "-",
+          "note": "-dash",
+          "body": "",
+          "v": 2
+        }
+      ],
+      "notes": "'\\-' escapes a leading dash; '\\e' is the empty string"
+    },
+    {
+      "id": "V021",
+      "title": "spaces and commas in strings",
+      "category": "escaping",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "a b c",
+          "note": "x,y,z",
+          "v": 3
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s note:s v:i\n@record\na\\sb\\sc\nx,y,z\n3",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s note:s v:i\n@record\na b c\nx,y,z\n3",
+      "expected_decoded": [
+        {
+          "id": "a b c",
+          "note": "x,y,z",
+          "v": 3
+        }
+      ],
+      "notes": "Structured Mode escapes spaces as \\s; commas are harmless in values"
+    },
+    {
+      "id": "V022",
+      "title": "backslash, newline, tab, CR",
+      "category": "escaping",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "a\\b",
+          "note": "line\nbreak",
+          "tab": "x\ty",
+          "cr": "a\rb",
+          "v": 4
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s note:s tab:s cr:s v:i\n@record\na\\\\b\nline\\nbreak\nx\\ty\na\\rb\n4",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s note:s tab:s cr:s v:i\n@record\na\\\\b\nline\\nbreak\nx\\ty\na\\rb\n4",
+      "expected_decoded": [
+        {
+          "id": "a\\b",
+          "note": "line\nbreak",
+          "tab": "x\ty",
+          "cr": "a\rb",
+          "v": 4
+        }
+      ],
+      "notes": "\\\\ \\n \\t \\r"
+    },
+    {
+      "id": "V023",
+      "title": "control chars and Unicode separators",
+      "category": "escaping",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "v\u000bf\ff\u001cg",
+          "note": "a b c",
+          "v": 5
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s note:s v:i\n@record\nv\\u000bf\\u000cf\\u001cg\na\\u2028b\\u2029c\n5",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s note:s v:i\n@record\nv\\u000bf\\u000cf\\u001cg\na\\u2028b\\u2029c\n5",
+      "expected_decoded": [
+        {
+          "id": "v\u000bf\ff\u001cg",
+          "note": "a b c",
+          "v": 5
+        }
+      ],
+      "notes": "MUST be \\uXXXX; raw ones would split a value into two lines"
+    },
+    {
+      "id": "V024",
+      "title": "integer safe-range boundaries",
+      "category": "numeric",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "max",
+          "v": 9007199254740991
+        },
+        {
+          "id": "min",
+          "v": -9007199254740991
+        },
+        {
+          "id": "zero",
+          "v": 0
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s v:i\n@record\nmax\n9007199254740991\n@record\nmin\n-9007199254740991\n@record\nzero\n0",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s v:i\n@record\nmax\n9007199254740991\n@record\nmin\n-9007199254740991\n@record\nzero\n0",
+      "expected_decoded": [
+        {
+          "id": "max",
+          "v": 9007199254740991
+        },
+        {
+          "id": "min",
+          "v": -9007199254740991
+        },
+        {
+          "id": "zero",
+          "v": 0
+        }
+      ],
+      "notes": "IEEE-754 safe integers; larger values must be rejected"
+    },
+    {
+      "id": "V025",
+      "title": "floats",
+      "category": "numeric",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "a",
+          "v": 3.14
+        },
+        {
+          "id": "b",
+          "v": -0.5
+        },
+        {
+          "id": "c",
+          "v": 2.5
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s v:f\n@record\na\n3.14\n@record\nb\n-0.5\n@record\nc\n2.5",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s v:f\n@record\na\n3.14\n@record\nb\n-0.5\n@record\nc\n2.5",
+      "expected_decoded": [
+        {
+          "id": "a",
+          "v": 3.14
+        },
+        {
+          "id": "b",
+          "v": -0.5
+        },
+        {
+          "id": "c",
+          "v": 2.5
+        }
+      ],
+      "notes": "all values are non-integral floats to avoid the int/float ambiguity documented in IMPLEMENTER_GUIDE.md"
+    },
+    {
+      "id": "V026",
+      "title": "booleans false / true",
+      "category": "numeric",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "a",
+          "v": false
+        },
+        {
+          "id": "b",
+          "v": true
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s v:b\n@record\na\nfalse\n@record\nb\ntrue",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s v:b\n@record\na\nfalse\n@record\nb\ntrue",
+      "expected_decoded": [
+        {
+          "id": "a",
+          "v": false
+        },
+        {
+          "id": "b",
+          "v": true
+        }
+      ],
+      "notes": "bool must not be treated as int 0/1"
+    },
+    {
+      "id": "V027",
+      "title": "mixed realistic agent state",
+      "category": "mixed",
+      "kind": "positive",
+      "input_json": [
+        {
+          "agent_id": "a000001",
+          "session": {
+            "id": "s000001",
+            "status": "active"
+          },
+          "tools": [
+            {
+              "name": "web_search",
+              "ok": true
+            }
+          ],
+          "tags": [
+            "AI",
+            "agent"
+          ],
+          "score": 3.5
+        },
+        {
+          "agent_id": "a000002",
+          "session": {
+            "id": "s000002",
+            "status": "queued"
+          },
+          "tools": [],
+          "tags": [],
+          "score": 1.25
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nagent_id:s session.id:s session.status:s tools[]:object tags[]:s score:f\n@record\na000001\ns000001\nactive\n@objects\nname:s ok:b\n1\nweb_search\ntrue\n@array\n2\nAI\nagent\n3.5\n@record\na000002\ns000002\nqueued\n@objects\n\n0\n@array\n0\n1.25",
+      "expected_aif_text_mode": "AIF/0.9\n\nagent_id:s session.id:s session.status:s tools[]:object tags[]:s score:f\n@record\na000001\ns000001\nactive\n@objects\nname:s ok:b\n1\nweb_search\ntrue\n@array\n2\nAI\nagent\n3.5\n@record\na000002\ns000002\nqueued\n@objects\n\n0\n@array\n0\n1.25",
+      "expected_decoded": [
+        {
+          "agent_id": "a000001",
+          "session": {
+            "id": "s000001",
+            "status": "active"
+          },
+          "tools": [
+            {
+              "name": "web_search",
+              "ok": true
+            }
+          ],
+          "tags": [
+            "AI",
+            "agent"
+          ],
+          "score": 3.5
+        },
+        {
+          "agent_id": "a000002",
+          "session": {
+            "id": "s000002",
+            "status": "queued"
+          },
+          "tools": [],
+          "tags": [],
+          "score": 1.25
+        }
+      ],
+      "notes": "nested + array + object array + float in one record"
+    },
+    {
+      "id": "V028",
+      "title": "all-null field",
+      "category": "null",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "a",
+          "v": null
+        },
+        {
+          "id": "b",
+          "v": null
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s v:n\n@record\na\n@null\n@record\nb\n@null",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s v:n\n@record\na\n@null\n@record\nb\n@null",
+      "expected_decoded": [
+        {
+          "id": "a",
+          "v": null
+        },
+        {
+          "id": "b",
+          "v": null
+        }
+      ],
+      "notes": "type n, every value is @null"
+    },
+    {
+      "id": "E001",
+      "title": "published example: 01_flat",
+      "category": "example",
+      "kind": "positive",
+      "input_json": [
+        {
+          "agent_id": "agent_001",
+          "status": "active",
+          "priority": 3,
+          "temperature": 0.7
+        },
+        {
+          "agent_id": "agent_002",
+          "status": "idle",
+          "priority": 1,
+          "temperature": 0.5
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nagent_id:s status:s priority:i temperature:f\n@record\nagent_001\nactive\n3\n0.7\n@record\nagent_002\nidle\n1\n0.5",
+      "expected_aif_text_mode": "AIF/0.9\n\nagent_id:s status:s priority:i temperature:f\n@record\nagent_001\nactive\n3\n0.7\n@record\nagent_002\nidle\n1\n0.5",
+      "expected_decoded": [
+        {
+          "agent_id": "agent_001",
+          "status": "active",
+          "priority": 3,
+          "temperature": 0.7
+        },
+        {
+          "agent_id": "agent_002",
+          "status": "idle",
+          "priority": 1,
+          "temperature": 0.5
+        }
+      ],
+      "notes": "source: examples/01_flat.json"
+    },
+    {
+      "id": "E002",
+      "title": "published example: 02_nested",
+      "category": "example",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "A1",
+          "profile": {
+            "city": "Shanghai",
+            "age": 30
+          },
+          "state": {
+            "session": {
+              "turn": 2,
+              "active": true
+            }
+          }
+        },
+        {
+          "id": "A2",
+          "profile": {
+            "city": "Beijing",
+            "age": 28
+          },
+          "state": {
+            "session": {
+              "turn": 5,
+              "active": false
+            }
+          }
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s profile.city:s profile.age:i state.session.turn:i state.session.active:b\n@record\nA1\nShanghai\n30\n2\ntrue\n@record\nA2\nBeijing\n28\n5\nfalse",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s profile.city:s profile.age:i state.session.turn:i state.session.active:b\n@record\nA1\nShanghai\n30\n2\ntrue\n@record\nA2\nBeijing\n28\n5\nfalse",
+      "expected_decoded": [
+        {
+          "id": "A1",
+          "profile": {
+            "city": "Shanghai",
+            "age": 30
+          },
+          "state": {
+            "session": {
+              "turn": 2,
+              "active": true
+            }
+          }
+        },
+        {
+          "id": "A2",
+          "profile": {
+            "city": "Beijing",
+            "age": 28
+          },
+          "state": {
+            "session": {
+              "turn": 5,
+              "active": false
+            }
+          }
+        }
+      ],
+      "notes": "source: examples/02_nested.json"
+    },
+    {
+      "id": "E003",
+      "title": "published example: 03_tool_calls",
+      "category": "example",
+      "kind": "positive",
+      "input_json": {
+        "agent_id": "agent_001",
+        "tools": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "AI technology",
+              "limit": 10
+            },
+            "result": {
+              "success": true,
+              "count": 10
+            }
+          },
+          {
+            "name": "calculator",
+            "arguments": {
+              "query": "1+1",
+              "limit": 1
+            }
+          }
+        ]
+      },
+      "expected_aif_structured": "AIF/0.9\n\n@single\nagent_id:s tools[]:object\n@record\nagent_001\n@objects\nname:s arguments.query:s arguments.limit:i result.success?:b result.count?:i\n2\nweb_search\nAI\\stechnology\n10\ntrue\n10\ncalculator\n1+1\n1\n-\n-",
+      "expected_aif_text_mode": "AIF/0.9\n\n@single\nagent_id:s tools[]:object\n@record\nagent_001\n@objects\nname:s arguments.query:s arguments.limit:i result.success?:b result.count?:i\n2\nweb_search\nAI technology\n10\ntrue\n10\ncalculator\n1+1\n1\n-\n-",
+      "expected_decoded": {
+        "agent_id": "agent_001",
+        "tools": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "AI technology",
+              "limit": 10
+            },
+            "result": {
+              "success": true,
+              "count": 10
+            }
+          },
+          {
+            "name": "calculator",
+            "arguments": {
+              "query": "1+1",
+              "limit": 1
+            }
+          }
+        ]
+      },
+      "notes": "source: examples/03_tool_calls.json"
+    },
+    {
+      "id": "E004",
+      "title": "published example: 04_messages_text_mode",
+      "category": "example",
+      "kind": "positive",
+      "input_json": [
+        {
+          "agent_id": "agent_001",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Find the latest AI news."
+            },
+            {
+              "role": "assistant",
+              "content": "I will search for current information."
+            }
+          ]
+        },
+        {
+          "agent_id": "agent_002",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Summarize the results please."
+            },
+            {
+              "role": "assistant",
+              "content": "Here is a short summary."
+            }
+          ]
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nagent_id:s messages[]:object\n@record\nagent_001\n@objects\nrole:s content:s\n2\nuser\nFind\\sthe\\slatest\\sAI\\snews.\nassistant\nI\\swill\\ssearch\\sfor\\scurrent\\sinformation.\n@record\nagent_002\n@objects\nrole:s content:s\n2\nuser\nSummarize\\sthe\\sresults\\splease.\nassistant\nHere\\sis\\sa\\sshort\\ssummary.",
+      "expected_aif_text_mode": "AIF/0.9\n\nagent_id:s messages[]:object\n@record\nagent_001\n@objects\nrole:s content:s\n2\nuser\nFind the latest AI news.\nassistant\nI will search for current information.\n@record\nagent_002\n@objects\nrole:s content:s\n2\nuser\nSummarize the results please.\nassistant\nHere is a short summary.",
+      "expected_decoded": [
+        {
+          "agent_id": "agent_001",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Find the latest AI news."
+            },
+            {
+              "role": "assistant",
+              "content": "I will search for current information."
+            }
+          ]
+        },
+        {
+          "agent_id": "agent_002",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Summarize the results please."
+            },
+            {
+              "role": "assistant",
+              "content": "Here is a short summary."
+            }
+          ]
+        }
+      ],
+      "notes": "source: examples/04_messages_text_mode.json"
+    },
+    {
+      "id": "E005",
+      "title": "published example: 05_null_and_optional",
+      "category": "example",
+      "kind": "positive",
+      "input_json": [
+        {
+          "id": "A1",
+          "result": {
+            "success": true
+          },
+          "note": "@null"
+        },
+        {
+          "id": "A2",
+          "result": null
+        },
+        {
+          "id": "A3"
+        }
+      ],
+      "expected_aif_structured": "AIF/0.9\n\nid:s result.success?:b note?:s\n@record\nA1\ntrue\n\\@null\n@record\nA2\n@onull:result\n-\n@record\nA3\n-\n-",
+      "expected_aif_text_mode": "AIF/0.9\n\nid:s result.success?:b note?:s\n@record\nA1\ntrue\n\\@null\n@record\nA2\n@onull:result\n-\n@record\nA3\n-\n-",
+      "expected_decoded": [
+        {
+          "id": "A1",
+          "result": {
+            "success": true
+          },
+          "note": "@null"
+        },
+        {
+          "id": "A2",
+          "result": null
+        },
+        {
+          "id": "A3"
+        }
+      ],
+      "notes": "source: examples/05_null_and_optional.json"
+    },
+    {
+      "id": "N001",
+      "title": "integer beyond IEEE-754 safe range",
+      "category": "error",
+      "kind": "negative",
+      "input_json": [
+        {
+          "id": "a",
+          "v": 9007199254740992
+        }
+      ],
+      "expected_error_type": "TypeError",
+      "expected_error_message_contains": "Integer out of IEEE-754 safe range (±9007199254740991): 9007",
+      "notes": "JS/Go/Rust cannot represent this integer exactly"
+    },
+    {
+      "id": "N002",
+      "title": "NaN",
+      "category": "error",
+      "kind": "negative",
+      "input_json": null,
+      "expected_error_type": "TypeError",
+      "expected_error_message_contains": "NaN / Infinity are not valid JSON numbers: nan",
+      "notes": "not a valid JSON number",
+      "not_valid_json": true,
+      "construct_hint": "Python: [{\"id\":\"a\",\"v\":float(\"nan\")}] — non-finite numbers are not valid JSON, so the public vector stores null as a placeholder."
+    },
+    {
+      "id": "N003",
+      "title": "Infinity",
+      "category": "error",
+      "kind": "negative",
+      "input_json": null,
+      "expected_error_type": "TypeError",
+      "expected_error_message_contains": "NaN / Infinity are not valid JSON numbers: inf",
+      "notes": "not a valid JSON number",
+      "not_valid_json": true,
+      "construct_hint": "Python: [{\"id\":\"a\",\"v\":float(\"inf\")}] — non-finite numbers are not valid JSON, so the public vector stores null as a placeholder."
+    },
+    {
+      "id": "N004",
+      "title": "conflicting field types",
+      "category": "error",
+      "kind": "negative",
+      "input_json": [
+        {
+          "id": "a",
+          "v": 1
+        },
+        {
+          "id": "b",
+          "v": "x"
+        }
+      ],
+      "expected_error_type": "TypeError",
+      "expected_error_message_contains": "Conflicting types for field 'v': ['i', 's']",
+      "notes": "same field cannot be both i and s"
+    },
+    {
+      "id": "N005",
+      "title": "nested array (unsupported)",
+      "category": "error",
+      "kind": "negative",
+      "input_json": [
+        {
+          "id": "a",
+          "v": [
+            [
+              1,
+              2
+            ],
+            [
+              3
+            ]
+          ]
+        }
+      ],
+      "expected_error_type": "TypeError",
+      "expected_error_message_contains": "Unsupported array item type for 'v': array. Nested arrays ar",
+      "notes": "arrays of arrays are outside AIF/0.9"
+    },
+    {
+      "id": "N006",
+      "title": "field name with a space",
+      "category": "error",
+      "kind": "negative",
+      "input_json": [
+        {
+          "bad name": "x"
+        }
+      ],
+      "expected_error_type": "TypeError",
+      "expected_error_message_contains": "AIF/0.9 field names cannot contain [' ']: 'bad name'",
+      "notes": "schema line is space-separated"
+    },
+    {
+      "id": "N007",
+      "title": "field name with a dot",
+      "category": "error",
+      "kind": "negative",
+      "input_json": [
+        {
+          "a.b": "x"
+        }
+      ],
+      "expected_error_type": "TypeError",
+      "expected_error_message_contains": "AIF/0.9 field names cannot contain '.': 'a.b'",
+      "notes": "'.' is the nested-path separator"
+    },
+    {
+      "id": "N008",
+      "title": "field name starting with @",
+      "category": "error",
+      "kind": "negative",
+      "input_json": [
+        {
+          "@id": "x"
+        }
+      ],
+      "expected_error_type": "TypeError",
+      "expected_error_message_contains": "AIF/0.9 field names cannot start with '@' or '-': '@id'",
+      "notes": "would collide with reserved markers"
+    },
+    {
+      "id": "N009",
+      "title": "top-level scalar",
+      "category": "error",
+      "kind": "negative",
+      "input_json": [
+        1,
+        2,
+        3
+      ],
+      "expected_error_type": "TypeError",
+      "expected_error_message_contains": "Top-level records must be objects",
+      "notes": "top level must be a dict or list of dicts"
+    }
+  ]
+}

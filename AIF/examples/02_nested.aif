@@ -1,0 +1,15 @@
+AIF/0.9
+
+id:s profile.city:s profile.age:i state.session.turn:i state.session.active:b
+@record
+A1
+Shanghai
+30
+2
+true
+@record
+A2
+Beijing
+28
+5
+false

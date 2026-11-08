@@ -1,0 +1,4 @@
+# Keep every byte verbatim. AIF is a line-oriented format and the frozen
+# files are checked by SHA256 (AIF/FROZEN.sha256); CRLF conversion would
+# silently break those hashes on checkout.
+* -text

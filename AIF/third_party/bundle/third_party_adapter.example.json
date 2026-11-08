@@ -1,0 +1,7 @@
+{
+  "name": "EXAMPLE ONLY - replace with your implementation",
+  "third_party": false,
+  "_comment": "third_party=true 只能在实现者确实未参与 AIF 原始实现时填写，详见 THIRD_PARTY_CHECKLIST.md",
+  "decode": ["python", "decode_cli.py"],
+  "encode": ["python", "encode_cli.py"]
+}

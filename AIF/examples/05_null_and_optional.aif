@@ -1,0 +1,15 @@
+AIF/0.9
+
+id:s result.success?:b note?:s
+@record
+A1
+true
+\@null
+@record
+A2
+@onull:result
+-
+@record
+A3
+-
+-
